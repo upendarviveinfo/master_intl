@@ -60,9 +60,7 @@
                 <h3 class="card-title"> <i class="fa fa-plus"></i>
                 <?= trans('bus_creation') ?> </h3>
             </div>
-            <div class="d-inline-block float-right">
-            <!-- <a href="<?= base_url('admin/operator'); ?>" class="btn btn-success"><i class="fa fa-list"></i>  <?= trans('operators_list') ?></a> -->
-            </div>
+          
         </div>
 	
         <div class="card-body">
@@ -70,7 +68,7 @@
                 <div class="row">
                 
                    <div class="col-sm">
-                        <label for="op_title" class="control-label"><?= trans('operator') ?></label>
+                        <label for="operator_id" class="control-label"><?= trans('operator') ?></label>
                         <select  name="operator" id="operator_id" class="form-control" onchange="getBusLayouttype()">
                         <option value="">--Select--</option>
                             <?php
@@ -88,11 +86,11 @@
                     </div>
 
                     <div class="col-sm">
-                        <label for="op_title" class="control-label"><?= trans('service_name') ?></label>
+                        <label for="service_name" class="control-label"><?= trans('service_name') ?></label>
                         <input type="text" name="servicename" value="" class="form-control" id="service_name" placeholder="<?= trans('service_name') ?>">
                     </div>
                     <div class="col-sm">
-                      <label for="op_title" class="control-label"><?= trans('title') ?></label>
+                      <label for="title" class="control-label"><?= trans('title') ?></label>
                        <input type="text" name="" value="" class="form-control" id="title" placeholder="<?= trans('title') ?>">
                     </div>
                     <div class="col-sm">
@@ -117,7 +115,7 @@
             <div class="container">
                 <div class="row">
                     <div class="col-sm-4">
-                        <label for="op_username" class=" control-label"><?= trans('service_type') ?></label>
+                        <label for="service_type" class=" control-label"><?= trans('service_type') ?></label>
                         <select class="form-control" name="servicetype" id="service_type" onchange="getWeekDays()" >
                         <?php
                             if($service_types->num_rows() > 0)
@@ -133,13 +131,13 @@
                         </select>
                     </div>
                     <div class="col-sm-4">
-                        <label for="op_title" class="control-label"><?= trans('layout_type') ?></label>
+                        <label for="layout_type" class="control-label"><?= trans('layout_type') ?></label>
                         <select class="form-control" name="layouttype" id="layout_type" onchange="GetLayout()">
                           <option value="Proprietor" selected="selected">--select--</option>
                         </select>
                     </div>
                     <div class="col-sm">
-                        <label for="op_username" class=" control-label"><?= trans('selecct_cities') ?></label>
+                        <label for="halts" class=" control-label"><?= trans('selecct_cities') ?></label>
                         <select class="form-control" name="halts" id="halts" >
                         <option value=""> - - Select - - </option>
                                 <?php
@@ -299,7 +297,7 @@ function GetLayout()
            $('#halts').focus();
            return false;
         }else{
-        $.post("Getrouteshalts", 
+        $.post("<?=base_url("admin/serviceCreation/Getrouteshalts")?>", 
         {
           '<?php echo $this->security->get_csrf_token_name(); ?>' : '<?php echo $this->security->get_csrf_hash(); ?>',
            halts:halts
@@ -396,7 +394,7 @@ function GetLayout()
         console.log("from_ids-"+from_ids);
         $('#sorder').val(Stage_Order);
         $('#stage_orderids').val(selected_cities);
-        $.post("Getroutescombinations", 
+        $.post("<?=base_url("admin/serviceCreation/Getroutescombinations")?>", 
             {
                 '<?php echo $this->security->get_csrf_token_name(); ?>' : '<?php echo $this->security->get_csrf_hash(); ?>',
                  from_ids:from_ids
@@ -478,7 +476,7 @@ function selectedroutedetails()
     else 
     {
         console.log("fids-"+fids+",toids-"+toids+"busmodel-"+busmodel+"opid-"+opid);
-        $.post("Displayroutedetails", 
+        $.post("<?=base_url("admin/serviceCreation/Displayroutedetails")?>", 
         {
             '<?php echo $this->security->get_csrf_token_name(); ?>' : '<?php echo $this->security->get_csrf_hash(); ?>',
              fids:fids,toids:toids,busmodel:busmodel,opid:opid
@@ -499,7 +497,6 @@ function validateBus()
    var bus_layout_model=$('#bus_layout_model').val();
    var service_type=$('#service_type').val();
    var layout_type=$('#layout_type').val();
-
    var fhalts=$('#fhalts').val();
    var fromSoucre_id=$('#fromSoucre_id').val();
    var toSoucre_id=$('#toSoucre_id').val();
@@ -507,6 +504,21 @@ function validateBus()
    var servicefrom=$('#servicefrom').val();
    var serviceto=$('#serviceto').val();
    var contact = /^[0-9]*\.?[0-9]+$/;
+   var weeks = "";
+    for (var i = 1; i <= 7; i++)
+    {
+        if ($('#chk' + i).is(":checked"))
+        {
+            if (weeks == 0 || weeks == "")
+            {
+                weeks = $('#chk' + i).val();
+            }
+            else
+            {
+                weeks = weeks + "#" + $('#chk' + i).val();
+            }
+        }
+    }
    if(op_id=='')
    {
       alert("Please Select Operator....!");
@@ -543,11 +555,17 @@ function validateBus()
       $('#layout_type').focus();
       return false;
    }
-        var fids = '', tids = '', f, t;
-        var froms = '', tos = '', sfares = '', lbfares = '', ubfares = '', ats = '';
-        var hhST = '', mmST = '', ampmST = '', hhAT = '', mmAT = '', ampmAT = '';
-        var jtimehr='', jtimemn='',currency='';
-        
+else if (service_type == 2 && weeks == "")
+    {
+        alert("Please select atleast one checkbox from Service Type !");
+        $('#service_type').focus();
+        return false;
+    }
+else{
+    var fids = '', tids = '', f, t;
+    var froms = '', tos = '', sfares = '', lbfares = '', ubfares = '', ats = '';
+    var hhST = '', mmST = '', ampmST = '', hhAT = '', mmAT = '', ampmAT = '';
+    var jtimehr='', jtimemn='',currency='';
  for (var j = 0; j <= fhalts-1; j++)
         {
             if (fids == '')
@@ -709,8 +727,8 @@ function validateBus()
             {
                 ampmAT = ampmAT + "," + $('#tfmAT' + j).val();
             }
-
-
+            
+           
             if ($('#timehrST' + j).val() == '' || $('#timehrST' + j).val() == 'HH')
             {
                 alert("Select Hours in start time");
@@ -809,8 +827,10 @@ function validateBus()
         console.log("op_id-"+op_id+",service_name-"+service_name+",layout_type-"+layout_type+",service_type-"+service_type+",title-"+title+",halts-"+fhalts+",bus_model-"+bus_layout_model
         +",fids-"+fids+",tids-"+tids+",froms-"+froms+",tos-"+tos+",sfares-"+sfares+",lbfares-"+lbfares+",ubfares-"+ubfares+",hhST-"+hhST+",mmST-"+mmST+",ampmST-"+ampmST+
         ",hhAT-"+hhAT+",mmAT-"+mmAT+",ampmAT-"+ampmAT+",jtimehr-"+jtimehr+",jtimemn-"+jtimemn+",fromSoucre_id-"+fromSoucre_id+",toSoucre_id-"+toSoucre_id+",sorder-"+sorder+
-        "servicefrom"+servicefrom+"serviceto"+serviceto);
-        $.post("saveBusDetails", 
+        "servicefrom"+servicefrom+"serviceto"+serviceto+"weeks"+weeks);
+        $('#create').val("Processing...!");
+        $('#create').attr("disabled", true);
+        $.post("<?=base_url("admin/serviceCreation/saveBusDetails")?>", 
         {
             '<?php echo $this->security->get_csrf_token_name(); ?>' : '<?php echo $this->security->get_csrf_hash(); ?>',
             op_id:op_id,
@@ -820,7 +840,7 @@ function validateBus()
             service_type:service_type,
             layout_type:layout_type,
             fhalts:fhalts,
-            //weeks: weeks,
+            weeks: weeks,
             fids: fids, 
             tids: tids, 
             froms: froms,
@@ -836,9 +856,8 @@ function validateBus()
             $('#create').attr("disabled", false);
             if (res == 1)
             {
-                setTimeout(function () {
-                          $('#success').show();
-                }, 800);
+             alert("Service Is Created Successfully,Please Add Boarding?Droping Points....!");
+              window.location = '<?php echo base_url("admin/serviceCreation") ?>';
             }
             else
             {
@@ -846,6 +865,7 @@ function validateBus()
                 // window.location = '<?php echo base_url("createbus_new/createBus") ?>';
             }
         });
+    }
 
 }
 

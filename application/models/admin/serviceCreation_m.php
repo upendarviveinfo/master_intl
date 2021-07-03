@@ -302,8 +302,8 @@ class serviceCreation_m extends CI_Model{
         $jtimemn1 = explode(",", $jtimemn);
         $jtimehr1 = explode(",", $jtimehr);
         $this->db->trans_start();
-         $query = $this->db->query("insert into master_buses (service_type,travel_id,bus_model_id,bus_type_id,service_route,service_name,title) 
-                                                     values ('$stype','$travel_id','$busmodel','$layout_type','$serviceFromTo','$sname','$title')");
+         $query = $this->db->query("insert into master_buses (service_type,travel_id,bus_model_id,bus_type_id,service_route,service_name,title,service_days) 
+                                                     values ('$stype','$travel_id','$busmodel','$layout_type','$serviceFromTo','$sname','$title','$weeks')");
          $insert_id = $this->db->insert_id();
          $query1 = $this->db->query("insert into master_main_routes (source_id,destination_id,service_num) 
                                    values ('$service_from_id','$service_to_id','$insert_id')");

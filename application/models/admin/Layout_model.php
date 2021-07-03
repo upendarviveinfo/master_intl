@@ -482,7 +482,7 @@ class Layout_model extends CI_Model{
 				$lower_rows = $row1->lower_rows;
 				$lower_cols = $row1->lower_cols;
 			}
-			echo '<table border="0" cellspacing="1" cellpadding="1"  align="center" style="padding-top:10px;padding-bottom:10px;">';
+			echo '<table table border="0" cellpadding="10" cellspacing="4">';
 			for ($i = 1; $i <=$lower_rows ; $i++) 
 			{
 				echo '<tr>';
